@@ -27,6 +27,7 @@
 enum tca_flags {tca_on, tca_off};
 enum rsa_flags {rsa_off, rsa_on};
 enum tca_idm_dr_flags {tca_idm_dr_on, tca_idm_dr_off};
+enum tca_idm_drmd_flags {tca_idm_drmd_on, tca_idm_drmd_off};
 enum rsa_idr_flags {rsa_idr_off, rsa_idr_on};
 enum ufa_flags {ufa_off, ufa_on};
 enum ncdmfa_flags {ncdmfa_off, ncdmfa_on};
@@ -242,7 +243,9 @@ struct perturbations
   short has_source_delta_b;    /**< do we need source for delta of baryons? */
   short has_source_delta_cdm;  /**< do we need source for delta of cold dark matter? */
   short has_source_delta_idm;  /**< do we need source for delta of interacting dark matter */
+  short has_source_delta_idm_drmd;
   short has_source_delta_idr;  /**< do we need source for delta of interacting dark radiation? */
+  short has_source_delta_idr_drmd;  /**< do we need source for delta of interacting dark radiation? */
   short has_source_delta_dcdm; /**< do we need source for delta of DCDM? */
   short has_source_delta_fld;  /**< do we need source for delta of dark energy? */
   short has_source_delta_scf;  /**< do we need source for delta from scalar field? */
@@ -256,7 +259,9 @@ struct perturbations
   short has_source_theta_b;    /**< do we need source for theta of baryons? */
   short has_source_theta_cdm;  /**< do we need source for theta of cold dark matter? */
   short has_source_theta_idm;  /**< do we need source for theta of interacting dark matter */
+  short has_source_theta_idm_drmd;
   short has_source_theta_idr;  /**< do we need source for theta of interacting dark radiation? */
+  short has_source_theta_idr_drmd;  /**< do we need source for theta of interacting dark radiation? (DRMD)*/
   short has_source_theta_dcdm; /**< do we need source for theta of DCDM? */
   short has_source_theta_fld;  /**< do we need source for theta of dark energy? */
   short has_source_theta_scf;  /**< do we need source for theta of scalar field? */
@@ -290,12 +295,14 @@ struct perturbations
   int index_tp_delta_b;   /**< index value for delta of baryons */
   int index_tp_delta_cdm; /**< index value for delta of cold dark matter */
   int index_tp_delta_idm; /**< index value for delta of interacting dark matter */
+  int index_tp_delta_idm_drmd; /**< index value for delta of interacting dark matter (DRMD) */
   int index_tp_delta_dcdm;/**< index value for delta of DCDM */
   int index_tp_delta_fld;  /**< index value for delta of dark energy */
   int index_tp_delta_scf;  /**< index value for delta of scalar field */
   int index_tp_delta_dr; /**< index value for delta of decay radiation */
   int index_tp_delta_ur; /**< index value for delta of ultra-relativistic neutrinos/relics */
   int index_tp_delta_idr; /**< index value for delta of interacting dark radiation */
+  int index_tp_delta_idr_drmd; /**< index value for delta of interacting dark radiation (DRMD) */
   int index_tp_delta_ncdm1; /**< index value for delta of first non-cold dark matter species (e.g. massive neutrinos) */
   int index_tp_perturbed_recombination_delta_temp;		/**< Gas temperature perturbation */
   int index_tp_perturbed_recombination_delta_chi;		/**< Inionization fraction perturbation */
@@ -311,7 +318,9 @@ struct perturbations
   int index_tp_theta_scf;   /**< index value for theta of scalar field */
   int index_tp_theta_ur;    /**< index value for theta of ultra-relativistic neutrinos/relics */
   int index_tp_theta_idr;   /**< index value for theta of interacting dark radiation */
+  int index_tp_theta_idr_drmd;   /**< index value for theta of interacting dark radiation */
   int index_tp_theta_idm;   /**< index value for theta of interacting dark matter */
+  int index_tp_theta_idm_drmd;   /**< index value for theta of interacting dark matter (DRMD */
   int index_tp_theta_dr;    /**< index value for F1 of decay radiation */
   int index_tp_theta_ncdm1; /**< index value for theta of first non-cold dark matter species (e.g. massive neutrinos) */
 
@@ -473,6 +482,8 @@ struct perturbations_vector
   int index_pt_theta_cdm; /**< cdm velocity */
   int index_pt_delta_idm; /**< idm density */
   int index_pt_theta_idm; /**< idm velocity */
+  int index_pt_delta_idm_drmd; /**< idm_drmd density */
+  int index_pt_theta_idm_drmd; /**< idm_drmd velocity */
   int index_pt_delta_dcdm; /**< dcdm density */
   int index_pt_theta_dcdm; /**< dcdm velocity */
   int index_pt_delta_fld;  /**< dark energy density in true fluid case */
@@ -487,6 +498,8 @@ struct perturbations_vector
   int l_max_ur;          /**< max momentum in Boltzmann hierarchy (at least 3) */
   int index_pt_delta_idr; /**< density of interacting dark radiation */
   int index_pt_theta_idr; /**< velocity of interacting dark radiation */
+  int index_pt_delta_idr_drmd; /**< density of interacting dark radiation (DRMD) */
+  int index_pt_theta_idr_drmd; /**< velocity of interacting dark radiation (DRMD) */
   int index_pt_shear_idr; /**< shear of interacting dark radiation */
   int index_pt_l3_idr;    /**< l=3 of interacting dark radiation */
   int l_max_idr;          /**< max momentum in Boltzmann hierarchy (at least 3) for interacting dark radiation */
@@ -591,6 +604,9 @@ struct perturbations_workspace
   double theta_idm; /**< interacting dark matter velocity */
   double theta_idm_prime; /**< derivative of interacting dark matter velocity in regard to conformal time */
 
+  double theta_idm_drmd; /**< interacting dark matter velocity (DRMD)*/
+  double theta_idm_prime_drmd; /**< derivative of interacting dark matter velocity in regard to conformal time (DRMD) */
+
   double * delta_ncdm;	/**< relative density perturbation of each ncdm species */
   double * theta_ncdm;	/**< velocity divergence theta of each ncdm species */
   double * shear_ncdm;	/**< shear for each ncdm species */
@@ -630,6 +646,7 @@ struct perturbations_workspace
   int index_ap_tca; /**< index for tight-coupling approximation */
   int index_ap_rsa; /**< index for radiation streaming approximation */
   int index_ap_tca_idm_dr; /**< index for dark tight-coupling approximation (idm-idr) */
+  int index_ap_tca_idm_drmd; /**< index for dark tight-coupling approximation (DRMD) */
   int index_ap_rsa_idr; /**< index for dark radiation streaming approximation */
   int index_ap_ufa; /**< index for ur fluid approximation */
   int index_ap_ncdmfa; /**< index for ncdm fluid approximation */

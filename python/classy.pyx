@@ -1566,6 +1566,10 @@ cdef class Class:
     def Neff(self):
         self.compute(["background"])
         return self.ba.Neff
+    
+    def f_drmd(self):
+        self.compute(["background"])
+        return self.ba.f_drmd
 
     def k_eq(self):
         self.compute(["background"])
@@ -2601,6 +2605,8 @@ cdef class Class:
                 value = self.ba.Omega0_ncdm_tot*self.ba.h*self.ba.h*93.14
             elif name == 'Neff':
                 value = self.ba.Neff
+            elif name == 'f_drmd':
+                value = self.ba.f_drmd
             elif name == 'Omega_m':
                 value = self.ba.Omega0_m
             elif name == 'omega_m':
