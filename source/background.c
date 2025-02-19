@@ -634,6 +634,15 @@ int background_functions(
     pvecback[pba->index_bg_p_tot_prime] += pvecback[pba->index_bg_p_prime_scf];
   }
 
+  if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
+  {
+    double Rint, csp2, Gint;
+
+    class_call(background_idm_drmd(pba, a, pvecback[pba->index_bg_rho_idm_drmd] / pvecback[pba->index_bg_rho_idr_drmd], &Rint, &csp2, &Gint), pba->error_message, pba->error_message);
+
+    pvecback[pba->index_bg_G_over_aH_drmd] = Gint / (pvecback[pba->index_bg_H] * a);
+  }
+
   /** - compute critical density */
   rho_crit = rho_tot - pba->K / a / a;
   class_test(rho_crit <= 0.,
@@ -1127,6 +1136,7 @@ int background_indices(
 
   /* - index for rho_idm_drmd  */
   class_define_index(pba->index_bg_rho_idm_drmd, pba->has_idm_drmd, index_bg, 1);
+  class_define_index(pba->index_bg_G_over_aH_drmd, pba->has_idm_drmd && pba->has_idr_drmd, index_bg, 1);
 
   /* - indices for ncdm. We only define the indices for ncdm1
      (density, pressure, pseudo-pressure), the other ncdm indices
@@ -1986,7 +1996,7 @@ int background_checks(
     if (pba->has_idr_drmd == _TRUE_)
     {
       N_dark = pba->Omega0_idr_drmd / 7. * 8. / pow(4. / 11., 4. / 3.) / pba->Omega0_g;
-      printf(" -> dark radiation Delta Neff (DRMD) %e\n", N_dark);
+      printf(" -> dark radiation Delta N_eff (DRMD) %e\n", N_dark);
     }
   }
 
@@ -2159,6 +2169,18 @@ int background_solve(
 
     pba->background_table[index_loga * pba->bg_size + pba->index_bg_ang_distance] = comoving_radius / (1. + pba->z_table[index_loga]);
     pba->background_table[index_loga * pba->bg_size + pba->index_bg_lum_distance] = comoving_radius * (1. + pba->z_table[index_loga]);
+
+    /* DRMD -- Find the decoupling redshift where Gint = aH */
+
+    if ((pba->has_idr_drmd) && (pba->has_idm_drmd))
+    {
+      double G_over_aH_local = pba->background_table[index_loga * pba->bg_size + pba->index_bg_G_over_aH_drmd];
+      if (pow(G_over_aH_local - 1.0, 2.0) < pow(pba->G_over_aH_tmp - 1.0, 2.0))
+      {
+        pba->G_over_aH_tmp = G_over_aH_local;
+        pba->z_dec_drmd = pba->z_table[index_loga];
+      }
+    }
   }
 
   /** - fill tables of second derivatives (in view of spline interpolation) */
@@ -2220,6 +2242,18 @@ int background_solve(
       printf("     -> Omega0_dr+Omega0_dcdm = %f, input value = %f\n",
              pba->Omega0_dr + pba->Omega0_dcdm, pba->Omega0_dcdmdr);
       printf("     -> Omega_ini_dcdm/Omega_b = %f\n", pba->Omega_ini_dcdm / pba->Omega0_b);
+    }
+
+    if ((pba->has_idr_drmd) && (pba->has_idm_drmd))
+    {
+      printf(" -> Dark Radiation Matter Decoupling details: (DRMD)\n");
+      printf("     -> values: (initial) Gamma0 = %f 1/Mpc, zstop= %e, f_drmd=%e, and f_idm= %e \n", pba->Gamma0_drmd, pba->z_stop, pba->f_drmd, pba->f_idm_drmd);
+      printf("     -> dark radiation Delta N_eff (DRMD) %e\n", pba->delta_Neff_drmd);
+      
+      if (pba->z_dec_drmd > 0)
+        printf("     -> decoupling occurred at z=%f \n", pba->z_dec_drmd);
+      else
+        printf("     -> no decoupling occurred.\n");
     }
     if (pba->has_scf == _TRUE_)
     {
@@ -2495,10 +2529,8 @@ int background_initial_conditions(
   if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
   {
     pba->Gamma0_drmd = 3. / 4. * pba->G_over_aH_drmd * pvecback[pba->index_bg_rho_idm_drmd] / pvecback[pba->index_bg_rho_idr_drmd] * a * pvecback[pba->index_bg_H];
-    pba->f_drmd = pvecback[pba->index_bg_rho_idr_drmd]/pvecback[pba->index_bg_rho_tot];
+    pba->f_drmd = pvecback[pba->index_bg_rho_idr_drmd] / pvecback[pba->index_bg_rho_tot];
     // Recall that Gamma0 = G * R =const with our conventions (for z >> zstop where the exponential can be set to unity )
-    if(pba->background_verbose >2)
-      printf(" -> dark radiation matter decoupling (DRMD) with initial Gamma0 = %f 1/Mpc, zstop= %e, f_drmd=%e, and f_idm= %e \n",pba->Gamma0_drmd, pba->z_stop,pba->f_drmd, pba->f_idm_drmd);
   }
 
   pvecback_integration[pba->index_bi_time] = 1. / (2. * pvecback[pba->index_bg_H]);
@@ -2722,6 +2754,7 @@ int background_output_data(
     class_store_double(dataptr, pvecback[pba->index_bg_rho_ur], pba->has_ur, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_idr], pba->has_idr, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_idr_drmd], pba->has_idr_drmd, storeidx);
+    class_store_double(dataptr, pvecback[pba->index_bg_G_over_aH_drmd], pba->has_idr_drmd && pba->has_idm_drmd, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_crit], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_dcdm], pba->has_dcdm, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_dr], pba->has_dr, storeidx);

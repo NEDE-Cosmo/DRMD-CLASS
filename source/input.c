@@ -3452,8 +3452,12 @@ int input_read_parameters_species(struct file_content *pfc,
     errmsg,
     "z_stop is chosen too large. If you want to probe z_stop > 100000 you need to start evolving perturbations earlier in CLASS by changing the precision settings.");
     /* By setting these precision parameters, we make sure perurbations are initalized early enough (definitely deep in rad domination).*/
-    ppr->start_large_k_at_tau_h_over_tau_k = 0.000002;
-    ppr->start_small_k_at_tau_c_over_tau_h = 0.000002;
+    
+    if (ppr->start_large_k_at_tau_h_over_tau_k > 0.000002)
+    {
+      ppr->start_large_k_at_tau_h_over_tau_k =0.000002;
+    }
+    
     } 
   }
 
@@ -6385,6 +6389,8 @@ int input_default_params(struct background *pba,
   pba->f_idm_drmd = 0.;
   pba->f_drmd = 0.;
   pba->delta_Neff_drmd = 0.;
+  pba->G_over_aH_tmp = 0.;
+  pba->z_dec_drmd = 0;
 
   /** 9) Dark energy contributions */
   pba->Omega0_fld = 0.;

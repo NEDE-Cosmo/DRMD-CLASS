@@ -198,32 +198,32 @@ test_hyperspherical: $(TOOLS) $(TEST_HYPERSPHERICAL)
 tar: $(C_ALL) $(C_TEST) $(H_ALL) $(PRE_ALL) $(INI_ALL) $(MISC_FILES) $(HYREC) $(PYTHON_FILES)
 	tar czvf class.tar.gz $(C_ALL) $(H_ALL) $(PRE_ALL) $(INI_ALL) $(MISC_FILES) $(HYREC) $(PYTHON_FILES)
 
-#classy: libclass.a python/classy.pyx python/cclassy.pxd
-#	cd python; export CC=$(CC); output=$$($(PYTHON) -m pip install . 2>&1); \
- #   echo "$$output"; \
- #   if echo "$$output" | grep -q "ERROR: Cannot uninstall"; then \
- #       site_packages=$$($(PYTHON) -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())" || $(PYTHON) -c "import site; print(site.getsitepackages()[0])") && \
-#		echo "Cleaning up previous installation in: $$site_packages" && \
- #       rm -rf $$site_packages/classy* && \
- #       $(PYTHON) -m pip install .; \
- #   fi
-
-
 classy: libclass.a python/classy.pyx python/cclassy.pxd
-	# Ensure common.h is available in the python build directory
-	#mkdir -p python/include
-	#cp include/common.h python/include/
+	cd python; export CC=$(CC); output=$$($(PYTHON) -m pip install . 2>&1); \
+    echo "$$output"; \
+    if echo "$$output" | grep -q "ERROR: Cannot uninstall"; then \
+        site_packages=$$($(PYTHON) -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())" || $(PYTHON) -c "import site; print(site.getsitepackages()[0])") && \
+		echo "Cleaning up previous installation in: $$site_packages" && \
+        rm -rf $$site_packages/classy* && \
+        $(PYTHON) -m pip install .; \
+    fi
 
-	# Export compiler and force pip to install in editable (in-place) mode
-	cd python; export CC=$(CC); \
-	output=$$($(PYTHON) -m pip install -e . --no-cache-dir 2>&1); \
-	echo "$$output"; \
-	if echo "$$output" | grep -q "ERROR: Cannot uninstall"; then \
-		site_packages=$$($(PYTHON) -c "import site; print(site.getsitepackages()[0])"); \
-		echo "Cleaning up previous installation in: $$site_packages"; \
-		rm -rf $$site_packages/classy*; \
-		$(PYTHON) -m pip install -e . --no-cache-dir; \
-	fi
+
+#classy: libclass.a python/classy.pyx python/cclassy.pxd
+#	# Ensure common.h is available in the python build directory
+#	#mkdir -p python/include
+#	#cp include/common.h python/include/
+
+#	# Export compiler and force pip to install in editable (in-place) mode
+#	cd python; export CC=$(CC); \
+#	output=$$($(PYTHON) -m pip install -e . --no-cache-dir 2>&1); \
+#	echo "$$output"; \
+#	if echo "$$output" | grep -q "ERROR: Cannot uninstall"; then \
+#		site_packages=$$($(PYTHON) -c "import site; print(site.getsitepackages()[0])"); \
+#		echo "Cleaning up previous installation in: $$site_packages"; \
+#		rm -rf $$site_packages/classy*; \
+#		$(PYTHON) -m pip install -e . --no-cache-dir; \
+#	fi
 
 clean: .base
 	rm -rf $(WRKDIR);

@@ -170,6 +170,8 @@ struct background
     double Gamma0_drmd;
     double G_over_aH_drmd;
     double f_drmd;
+    double G_over_aH_tmp;
+    double z_dec_drmd;
 
     //@}
 
@@ -190,6 +192,7 @@ struct background
     int index_bg_rho_cdm; /**< cdm density */
     int index_bg_rho_idm; /**< idm density */
     int index_bg_rho_idm_drmd;
+    int index_bg_G_over_aH_drmd;
     int index_bg_rho_lambda; /**< cosmological constant density */
     int index_bg_rho_fld;    /**< fluid density */
     int index_bg_w_fld;      /**< fluid equation of state */
