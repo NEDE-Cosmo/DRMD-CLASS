@@ -1,5 +1,5 @@
 #------Experiments to test (separated with commas)-----
-data.experiments=['Planck_highl_TTTEEE','Planck_lowl_EE','Planck_lowl_TT','Planck_lensing','Pantheon_Plus','bao_smallz_2014','bao_fs_boss_dr12']
+data.experiments=['Planck_highl_TTTEEE','Planck_lowl_EE','Planck_lowl_TT','Planck_lensing','bao_smallz_2014','bao_boss_dr12','Pantheon']
 
 
 #------ Settings for the over-sampling.
@@ -97,9 +97,7 @@ data.parameters['A_planck']          = [ 1.00061,   0.9,   1.1,     0.0025,     
 data.parameters['A_pol']             = [       1,     1,     1,          0,     1, 'nuisance']
 
 
-###JLA Nuisance parameters
-
-data.parameters['M']	   = [-19.3, -19.5, -18.5, 0.01,  1, 'nuisance']
+data.parameters['M']          = [-19.1,   None, None,  0.004,  1,'nuisance']
 
 # Derived parameters
 
@@ -110,7 +108,6 @@ data.parameters['rs_d']          = [0, None, None, 0,     1,   'derived']
 data.parameters['f_drmd']          = [0, None, None, 0,     1,   'derived']
 data.parameters['z_dec_drmd']          = [0, None, None, 0,     1,   'derived']
 data.parameters['YHe']          = [0, None, None, 0,     1,   'derived']
-
 
 # Other cosmo parameters (fixed parameters, precision parameters, etc.)
 
@@ -139,8 +136,7 @@ data.cosmo_arguments['P_k_max_h/Mpc'] = 1.
 
 #data.cosmo_arguments['background_verbose'] = 4
 #data.cosmo_arguments['perturbations_verbose'] = 2
-#data.cosmo_arguments['tol_perturb_integration'] = 1.0e-6
-
+data.cosmo_arguments['start_large_k_at_tau_h_over_tau_k'] = 0.00002
 
 
 #------ Mcmc parameters ----
