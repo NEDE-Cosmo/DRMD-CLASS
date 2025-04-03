@@ -564,10 +564,18 @@ int thermodynamics_helium_from_bbn(
              pba->error_message,
              pth->error_message);
 
+  
+
   Neff_bbn = (pvecback[pba->index_bg_Omega_r]
               *pvecback[pba->index_bg_rho_crit]
               -pvecback[pba->index_bg_rho_g])
     /(7./8.*pow(4./11.,4./3.)*pvecback[pba->index_bg_rho_g]);
+
+  /*DRMD: The DR component is produced after BBN, so we have to subtract it here:  */
+
+  if(pba->has_idr_drmd == _TRUE_){
+    Neff_bbn -= (pvecback[pba->index_bg_rho_idr_drmd])/(7./8.*pow(4./11.,4./3.)*pvecback[pba->index_bg_rho_g]);
+  }
 
 
   //  printf("Neff early = %g, Neff at bbn: %g\n",pba->Neff,Neff_bbn);

@@ -3442,21 +3442,22 @@ int input_read_parameters_species(struct file_content *pfc,
 
     pba->Omega0_idr_drmd = pba->delta_Neff_drmd * 7. / 8. * pow(4. / 11., 4. / 3.) * pba->Omega0_g;
 
-    class_test((pth->YHe == _YHE_BBN_),
+    /*class_test((pth->YHe == _YHE_BBN_),
                errmsg,
                "In the DRMD model the Helium abundance must be set by hand as DR is created after BBN! You can go for example with the LCDM vanilla value YHe = 0.2454. Remark: If you want to look at a microscopic model that creates DR after BBN check out Hot NEDE. ");
-
+    */
+   
     if (pba->f_idm_drmd > 0)
     {
-    class_test((pba->z_stop > 100000.),
-    errmsg,
-    "z_stop is chosen too large. If you want to probe z_stop > 100000 you need to start evolving perturbations earlier in CLASS by changing the precision settings.");
+    //class_test((pba->z_stop > 1000000.),
+    //errmsg,
+    //"z_stop is chosen too large. If you want to probe z_stop > 1000000 you need to start evolving perturbations earlier in CLASS by changing the precision settings.");
     /* By setting these precision parameters, we make sure perurbations are initalized early enough (definitely deep in rad domination).*/
     
-    if (ppr->start_large_k_at_tau_h_over_tau_k > 0.000002)
-    {
-      ppr->start_large_k_at_tau_h_over_tau_k =0.000002;
-    }
+    //if (ppr->start_large_k_at_tau_h_over_tau_k > 0.000002)
+    //{
+     // ppr->start_large_k_at_tau_h_over_tau_k =0.000002;
+    //}
     
     } 
   }

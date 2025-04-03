@@ -2249,7 +2249,7 @@ int background_solve(
       printf(" -> Dark Radiation Matter Decoupling details: (DRMD)\n");
       printf("     -> values: (initial) Gamma0 = %f 1/Mpc, zstop= %e, f_drmd=%e, and f_idm= %e \n", pba->Gamma0_drmd, pba->z_stop, pba->f_drmd, pba->f_idm_drmd);
       printf("     -> dark radiation Delta N_eff (DRMD) %e\n", pba->delta_Neff_drmd);
-      
+
       if (pba->z_dec_drmd > 0)
         printf("     -> decoupling occurred at z=%f \n", pba->z_dec_drmd);
       else
@@ -2525,11 +2525,15 @@ int background_initial_conditions(
              pba->error_message,
              "H = %e instead of strictly positive", pvecback[pba->index_bg_H]);
 
-  /** - compute Gamma0 for the DRMD scenario */
-  if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
+  /** - compute Gamma0 and f_drmd for the DRMD scenario */
+  if (pba->has_idr_drmd == _TRUE_)
   {
-    pba->Gamma0_drmd = 3. / 4. * pba->G_over_aH_drmd * pvecback[pba->index_bg_rho_idm_drmd] / pvecback[pba->index_bg_rho_idr_drmd] * a * pvecback[pba->index_bg_H];
     pba->f_drmd = pvecback[pba->index_bg_rho_idr_drmd] / pvecback[pba->index_bg_rho_tot];
+
+    if (pba->has_idm_drmd == _TRUE_)
+    {
+      pba->Gamma0_drmd = 3. / 4. * pba->G_over_aH_drmd * pvecback[pba->index_bg_rho_idm_drmd] / pvecback[pba->index_bg_rho_idr_drmd] * a * pvecback[pba->index_bg_H];
+    }
     // Recall that Gamma0 = G * R =const with our conventions (for z >> zstop where the exponential can be set to unity )
   }
 

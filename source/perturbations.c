@@ -6089,9 +6089,9 @@ int perturbations_initial_conditions(struct precision *ppr,
 
         if (pba->has_idr_drmd == _TRUE_)
         {
-          class_test(1./a-1. < pba->z_stop*10,
-          ppt->error_message,
-          "Modes need to be initalized before idm starts to decouple from idr (DRMD) !");
+          //class_test(1./a-1. < pba->z_stop*10,
+          //ppt->error_message,
+          //"Modes need to be initalized before idm starts to decouple from idr (DRMD) !");
 
           if (ppw->approx[ppw->index_ap_tca_idm_drmd] == (int)tca_idm_drmd_on)
           {
@@ -6099,7 +6099,13 @@ int perturbations_initial_conditions(struct precision *ppr,
           }
           else
           {
-            ppw->pv->y[ppw->pv->index_pt_theta_idm_drmd] = pba->G_over_aH_drmd / (4. + pba->G_over_aH_drmd) * ppw->pv->y[ppw->pv->index_pt_theta_idr_drmd] ; //This is the general expression valid for weak (G/(aH) <<1  and strong (G/(aH)>>1 coupling.))
+            double Rint, csp2, Gint;
+            double conformalH = ppw->pvecback[pba->index_bg_H] * ppw->pvecback[pba->index_bg_a];
+      
+            class_call(background_idm_drmd(pba, ppw->pvecback[pba->index_bg_a], ppw->pvecback[pba->index_bg_rho_idm_drmd] / ppw->pvecback[pba->index_bg_rho_idr_drmd], &Rint, &csp2, &Gint), pba->error_message, pba->error_message);
+            
+            ppw->pv->y[ppw->pv->index_pt_theta_idm_drmd] = Gint / (4. + Gint) * ppw->pv->y[ppw->pv->index_pt_theta_idr_drmd] ; //This is the general expression valid for weak (G/(aH) <<1  and strong (G/(aH)>>1 coupling.))
+            //ppw->pv->y[ppw->pv->index_pt_theta_idm_drmd] = pba->G_over_aH_drmd / (4. + pba->G_over_aH_drmd) * ppw->pv->y[ppw->pv->index_pt_theta_idr_drmd] ; //This is the general expression valid for weak (G/(aH) <<1  and strong (G/(aH)>>1 coupling.))
           }
         }
         else
