@@ -19,8 +19,8 @@ vpath .base build
 ########################################################
 
 # your C compiler:
-CC        = clang
-#CC       = gcc
+#CC        = clang
+CC       = gcc
 #CC       = icc
 #CC       = pgcc
 CPP      = g++ --std=c++11 -fpermissive -Wno-write-strings
@@ -41,8 +41,8 @@ OPTFLAG = -O3
 #OPTFLAG = -fast
 
 # your openmp flag (comment for compiling without openmp)
-OMPFLAG   = -Xclang -fopenmp
-#OMPFLAG   = -pthread #-fopenmp
+#OMPFLAG   = -Xclang -fopenmp
+OMPFLAG   = -pthread #-fopenmp
 #OMPFLAG   = -mp -mp=nonuma -mp=allcores -g
 #OMPFLAG   = -openmp
 
@@ -50,7 +50,7 @@ OMPFLAG   = -Xclang -fopenmp
 
 CCFLAG = -g -fPIC
 LDFLAG = -g -fPIC
-LDFLAG += -lomp
+#LDFLAG += -lomp
 
 # leave blank to compile without HyRec, or put path to HyRec directory
 # (with no slash at the end: e.g. "external/RecfastCLASS")

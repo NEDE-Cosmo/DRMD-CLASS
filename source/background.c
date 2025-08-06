@@ -801,7 +801,7 @@ int background_idm_drmd(
     double rho_idm_over_rho_idr,
     double *Rint,
     double *csp2,
-    double *Gint) // needed for the shear
+    double *Gint)
 {
 
   double z = 1.0 / a - 1.0;
@@ -810,8 +810,8 @@ int background_idm_drmd(
 
   R_int_tmp = 3. / 4. * rho_idm_over_rho_idr;
   *Rint = R_int_tmp;
-  *csp2 = 1. / 3. / (1. + R_int_tmp); // Eq 10
-  if ((1.0 + pba->z_stop) / (1 + z) > 50)
+  *csp2 = 1. / 3. / (1. + R_int_tmp); 
+  if ((1.0 + pba->z_stop) / (1 + z) > 100) // To avoid numerical problems in exp()
     *Gint = 0;
   else
     *Gint = pba->Gamma0_drmd / R_int_tmp * exp(-(1.0 + pba->z_stop) / (1 + z));

@@ -1,5 +1,5 @@
 #------Experiments to test (separated with commas)-----
-data.experiments=['Planck_highl_TTTEEE','Planck_lowl_EE','Planck_lowl_TT','Planck_lensing','bao_smallz_2014','bao_boss_dr12','Pantheon','sh0es_Mb_22']
+data.experiments=['Planck_highl_TTTEEE','Planck_lowl_EE','Planck_lowl_TT','Planck_lensing','bao_smallz_2014','bao_boss_dr12','Pantheon']
 
 
 #------ Settings for the over-sampling.
@@ -41,10 +41,9 @@ data.parameters['n_s']          = [0.99,   None, None, 0.0074,    1, 'cosmo']
 data.parameters['tau_reio']     = [0.057,   0.04, None,  0.013,    1, 'cosmo']
 
 #DRMD parameters
-data.parameters['delta_Neff_drmd']    = [0.4,   0.0000001, 3,  0.14,    1, 'cosmo']
-data.parameters['log10z_stop']     = [4.2,   2, 5,  0.06,    1, 'cosmo']
+data.parameters['delta_Neff_drmd']    = [0.7,   0.0000001, 3,  0.14,    1, 'cosmo']
+data.parameters['log10z_stop']     = [4.7,   2, 5,  0.06,    1, 'cosmo']
 data.parameters['f_idm_drmd']     = [0.03,   0.0000001, 1,  0.02,    1, 'cosmo']
-data.parameters['log10G/(aH)']     = [4.3,   2, 14,  0.5,    1, 'cosmo']
 
 
 # Nuisance parameter list, same call, except the name does not have to be a class name
@@ -99,15 +98,16 @@ data.parameters['A_pol']             = [       1,     1,     1,          0,     
 
 data.parameters['M']          = [-19.1,   None, None,  0.004,  1,'nuisance']
 
-# Derived parameters
-
+# Standard derived parameters
 data.parameters['H0']              = [0, None, None, 0,     1,   'derived']
 data.parameters['Omega_m']              = [0, None, None, 0,     1,   'derived']
 data.parameters['sigma8']          = [0, None, None, 0,     1,   'derived']
 data.parameters['rs_d']          = [0, None, None, 0,     1,   'derived']
+data.parameters['YHe']          = [0, None, None, 0,     1,   'derived']
+
+#DRMD derived parameters:
 data.parameters['f_drmd']          = [0, None, None, 0,     1,   'derived']
 data.parameters['z_dec_drmd']          = [0, None, None, 0,     1,   'derived']
-data.parameters['YHe']          = [0, None, None, 0,     1,   'derived']
 
 # Other cosmo parameters (fixed parameters, precision parameters, etc.)
 
@@ -129,14 +129,9 @@ data.cosmo_arguments['T_ncdm'] = 0.71611
 data.cosmo_arguments['output'] = 'mPk'
 data.cosmo_arguments['P_k_max_h/Mpc'] = 1.
 
-
-
-
-
-
-#data.cosmo_arguments['background_verbose'] = 4
-#data.cosmo_arguments['perturbations_verbose'] = 2
+# These are additional DRMD parameters 
 data.cosmo_arguments['start_large_k_at_tau_h_over_tau_k'] = 0.00002
+data.cosmo_arguments['G_over_aH_drmd_ini'] = 1.e9
 
 
 #------ Mcmc parameters ----
