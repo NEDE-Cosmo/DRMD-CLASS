@@ -2,7 +2,7 @@ DRMD-CLASS
 ==========
 
 DRMD-CLASS is a modified version of CLASS implementing the Dark Radiation–Matter Decoupling
-(DRMD) model. It is based on CLASS v3.2.5 by Julien Lesgourgues, Thomas Tram,
+(DRMD) model. It is based on CLASS v3.3.4 by Julien Lesgourgues, Thomas Tram,
 and Nils Schöneberg; see http://class-code.net and
 https://github.com/lesgourg/class_public.
 
