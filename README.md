@@ -43,10 +43,15 @@ The main DRMD parameters are:
     if set to 0, the model reduced to SIDR (produced after BBN);
 - `z_stop`: the critical redshift at which the interaction rate starts to become
     exponentially suppressed;
-- `G_over_aH_drmd_ini`: Initial interaction rate divided by H. This ratio is 
+- `G_over_aH_drmd_ini`: initial interaction rate divided by H. This ratio is 
     constant during rad. domination. Values >> 1 correspond to initial tight coupling. 
     Data has almost no sensitivity to this parameter (see first paper on DRMD) and it 
     can be set to some fiducial value (recommendation: 1e7).
+
+The derived DRMD parameters are:
+
+- 'z_dec_drmd': redshift at which G_over_aH = 1;
+- 'rs_d_drmd': the dark sound horizon scale.
 
 The DRMD component is designed to run alongside the standard CLASS components,
 including NCDM, iDR, ETHOS, idm, and others. The main code modifications are
