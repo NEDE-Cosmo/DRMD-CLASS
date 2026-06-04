@@ -3,7 +3,6 @@ output/
 build/
 class
 *.prof
-*.ini
 libclass.a
 *out
 python/classy.cpp
@@ -14,4 +13,6 @@ RealSpaceInterface/cache/
 .DS_Store
 doc/manual/html
 doc/manual/latex
+
+# Python build artifacts
 *.egg-info/

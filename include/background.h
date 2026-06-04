@@ -172,6 +172,7 @@ struct background
     double f_drmd;
     double G_over_aH_tmp;
     double z_dec_drmd;
+    double rs_d_drmd;
 
     //@}
 
@@ -230,6 +231,8 @@ struct background
     int index_bg_lum_distance;  /**< luminosity distance in Mpc */
     int index_bg_time;          /**< proper (cosmological) time in Mpc */
     int index_bg_rs;            /**< comoving sound horizon in Mpc */
+    int index_bg_rs_drmd;            /**< dark sector comoving sound horizon in Mpc */
+    
 
     int index_bg_D; /**< scale independent growth factor D(a) for CDM perturbations */
     int index_bg_f; /**< corresponding velocity growth factor [dlnD]/[dln a] */
@@ -286,6 +289,7 @@ struct background
 
     int index_bi_time;    /**< {C} proper (cosmological) time in Mpc */
     int index_bi_rs;      /**< {C} sound horizon */
+    int index_bi_rs_drmd;      /**< {C} sound horizon */
     int index_bi_tau;     /**< {C} conformal time in Mpc */
     int index_bi_D;       /**< {C} scale independent growth factor D(a) for CDM perturbations. */
     int index_bi_D_prime; /**< {C} D satisfies \f$ [D''(\tau)=-aHD'(\tau)+3/2 a^2 \rho_M D(\tau) \f$ */

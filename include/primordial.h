@@ -252,6 +252,7 @@ struct primordial {
   double ** amplitude; /**< all amplitudes in matrix form: amplitude[index_md][index_ic1_ic2] */
   double ** tilt;      /**< all tilts in matrix form: tilt[index_md][index_ic1_ic2] */
   double ** running;   /**< all runnings in matrix form: running[index_md][index_ic1_ic2] */
+  double ** running_running;   /**< all runnings in matrix form: running[index_md][index_ic1_ic2] */
 
   //@}
 

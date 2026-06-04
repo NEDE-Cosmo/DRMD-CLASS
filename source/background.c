@@ -674,6 +674,10 @@ int background_functions(
     /** - velocity growth factor */
     pvecback[pba->index_bg_f] = pvecback_B[pba->index_bi_D_prime] / (pvecback_B[pba->index_bi_D] * a * pvecback[pba->index_bg_H]);
 
+    /** - dark comoving sound horizon */
+    if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
+      pvecback[pba->index_bg_rs_drmd] = pvecback_B[pba->index_bi_rs_drmd];
+
     /**- Varying fundamental constants */
     if (pba->has_varconst == _TRUE_)
     {
@@ -685,6 +689,9 @@ int background_functions(
                  pba->error_message);
     }
 
+    /** - dark comoving sound horizon */
+    if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
+      pvecback[pba->index_bg_rs_drmd] = pvecback_B[pba->index_bi_rs_drmd];
     /* one can put other variables here */
     /*  */
     /*  */
@@ -810,7 +817,7 @@ int background_idm_drmd(
 
   R_int_tmp = 3. / 4. * rho_idm_over_rho_idr;
   *Rint = R_int_tmp;
-  *csp2 = 1. / 3. / (1. + R_int_tmp); 
+  *csp2 = 1. / 3. / (1. + R_int_tmp);
   if ((1.0 + pba->z_stop) / (1 + z) > 100) // To avoid numerical problems in exp()
     *Gint = 0;
   else
@@ -1232,6 +1239,9 @@ int background_indices(
   /* -> varying fundamental constant -- me (effective electron mass) */
   class_define_index(pba->index_bg_varc_me, pba->has_varconst, index_bg, 1);
 
+  /* -> dark conformal sound horizon */
+  class_define_index(pba->index_bg_rs_drmd, (pba->has_idm_drmd) && (pba->has_idr_drmd), index_bg, 1);
+
   /* -> put here additional quantities describing background */
   /*    */
   /*    */
@@ -1274,6 +1284,9 @@ int background_indices(
   /* -> Second order equation for growth factor */
   class_define_index(pba->index_bi_D, _TRUE_, index_bi, 1);
   class_define_index(pba->index_bi_D_prime, _TRUE_, index_bi, 1);
+
+  /* -> dark sound horizon */
+  class_define_index(pba->index_bi_rs_drmd, (pba->has_idm_drmd) && (pba->has_idr_drmd), index_bi, 1);
 
   /* -> end of indices in the vector of variables to integrate */
   pba->bi_size = index_bi;
@@ -2172,6 +2185,8 @@ int background_solve(
 
     /* DRMD -- Find the decoupling redshift where Gint = aH */
 
+    /* This part is replaced by a more accurate interpolation below*/
+    /*
     if ((pba->has_idr_drmd) && (pba->has_idm_drmd))
     {
       double G_over_aH_local = pba->background_table[index_loga * pba->bg_size + pba->index_bg_G_over_aH_drmd];
@@ -2180,6 +2195,44 @@ int background_solve(
         pba->G_over_aH_tmp = G_over_aH_local;
         pba->z_dec_drmd = pba->z_table[index_loga];
       }
+    }
+   */
+  }
+
+  /* DRMD -- Find the decoupling redshift where Gint = aH through linear interpolation and infer the dark drag horizon */
+  if ((pba->has_idr_drmd) && (pba->has_idm_drmd))
+  {
+
+    /** - get close to idm drag time */
+    int index_loga_tmp = 0;
+    while ((pba->background_table[index_loga_tmp * pba->bg_size + pba->index_bg_G_over_aH_drmd] > 1.) && (index_loga_tmp < pba->bt_size))
+    {
+      index_loga_tmp++;
+    }
+
+    if (index_loga_tmp == 0)
+    {
+      pba->z_dec_drmd = pba->z_table[0];
+      pba->rs_d_drmd = pba->background_table[(index_loga_tmp)*pba->bg_size + pba->index_bg_rs_drmd];
+    }
+    else if (index_loga_tmp == pba->bt_size)
+    {
+      pba->z_dec_drmd = pba->z_table[pba->bt_size - 1];
+      pba->rs_d_drmd = pba->background_table[(index_loga_tmp-1)*pba->bg_size + pba->index_bg_rs_drmd];
+    }
+    else
+    {
+
+      double z1 = pba->z_table[index_loga_tmp];
+      double z2 = pba->z_table[index_loga_tmp - 1];
+      double y1 = pba->background_table[index_loga_tmp * pba->bg_size + pba->index_bg_G_over_aH_drmd];
+      double y2 = pba->background_table[(index_loga_tmp - 1) * pba->bg_size + pba->index_bg_G_over_aH_drmd];
+      double rs1 = pba->background_table[(index_loga_tmp)*pba->bg_size + pba->index_bg_rs_drmd];
+      double rs2 = pba->background_table[(index_loga_tmp - 1) * pba->bg_size + pba->index_bg_rs_drmd];
+      pba->z_dec_drmd= z2 + (1.0 - y1) * (z1 - z2) / (y2 - y1);
+      pba->rs_d_drmd = rs2 + (pba->z_dec_drmd - z2) * (rs1 - rs2) / (z1 - z2);
+      double y_precise = y1 + (pba->z_dec_drmd - z2) * (y2 - y1) / (z1 - z2);
+      //printf(" -> z_dec_drmd_precise: between (%f,%f,%f) and (%f,%f,%f): (%f,%f,%f) \n", z2, y2, rs2, z1, y1, rs1, pba->z_dec_drmd, y_precise, pba->rs_d_drmd);
     }
   }
 
@@ -2254,6 +2307,11 @@ int background_solve(
         printf("     -> decoupling occurred at z=%f \n", pba->z_dec_drmd);
       else
         printf("     -> no decoupling occurred.\n");
+
+      if (pba->rs_d_drmd > 0)
+        printf("     -> dark drag horizon r_DAO=%f Mpc\n", pba->rs_d_drmd);
+      else
+        printf("     -> no valid drag horizon inferred.\n");
     }
     if (pba->has_scf == _TRUE_)
     {
@@ -2551,6 +2609,10 @@ int background_initial_conditions(
   pvecback_integration[pba->index_bi_D] = 1.;
   pvecback_integration[pba->index_bi_D_prime] = 2. * a * pvecback[pba->index_bg_H];
 
+  /** - compute initial dark sound horizon, assuming \f$ c_s=1/\sqrt{3} \f$ initially */
+  if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
+    pvecback_integration[pba->index_bi_rs_drmd] = pvecback_integration[pba->index_bi_tau] / sqrt(3.);
+
   /** - return the value finally chosen for the initial log(a) */
   *loga_ini = log(a);
 
@@ -2659,6 +2721,7 @@ int background_output_titles(
   class_store_columntitle(titles, "ang.diam.dist.", _TRUE_);
   class_store_columntitle(titles, "lum. dist.", _TRUE_);
   class_store_columntitle(titles, "comov.snd.hrz.", _TRUE_);
+  class_store_columntitle(titles, "dark comov.snd.hrz.", pba->has_idr_drmd && pba->has_idm_drmd);
   class_store_columntitle(titles, "(.)rho_g", _TRUE_);
   class_store_columntitle(titles, "(.)rho_b", _TRUE_);
   class_store_columntitle(titles, "(.)rho_cdm", pba->has_cdm);
@@ -2680,6 +2743,7 @@ int background_output_titles(
   class_store_columntitle(titles, "(.)rho_ur", pba->has_ur);
   class_store_columntitle(titles, "(.)rho_idr", pba->has_idr);
   class_store_columntitle(titles, "(.)rho_idr_drmd", pba->has_idr_drmd);
+  class_store_columntitle(titles, "(.)G_over_aG_drmd", pba->has_idr_drmd && pba->has_idm_drmd);
   class_store_columntitle(titles, "(.)rho_crit", _TRUE_);
   class_store_columntitle(titles, "(.)rho_dcdm", pba->has_dcdm);
   class_store_columntitle(titles, "(.)rho_dr", pba->has_dr);
@@ -2696,6 +2760,9 @@ int background_output_titles(
   class_store_columntitle(titles, "(.)rho_tot", _TRUE_);
   class_store_columntitle(titles, "(.)p_tot", _TRUE_);
   class_store_columntitle(titles, "(.)p_tot_prime", _TRUE_);
+
+  class_store_columntitle(titles, "Omega_r(z)", _TRUE_);
+  class_store_columntitle(titles, "Omega_m(z)", _TRUE_);
 
   class_store_columntitle(titles, "gr.fac. D", _TRUE_);
   class_store_columntitle(titles, "gr.fac. f", _TRUE_);
@@ -2739,6 +2806,7 @@ int background_output_data(
     class_store_double(dataptr, pvecback[pba->index_bg_ang_distance], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_lum_distance], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rs], _TRUE_, storeidx);
+    class_store_double(dataptr, pvecback[pba->index_bg_rs_drmd], pba->has_idr_drmd && pba->has_idm_drmd, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_g], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_b], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_rho_cdm], pba->has_cdm, storeidx);
@@ -2775,6 +2843,9 @@ int background_output_data(
     class_store_double(dataptr, pvecback[pba->index_bg_rho_tot], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_p_tot], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_p_tot_prime], _TRUE_, storeidx);
+
+    class_store_double(dataptr, pvecback[pba->index_bg_Omega_r], _TRUE_, storeidx);
+    class_store_double(dataptr, pvecback[pba->index_bg_Omega_m], _TRUE_, storeidx);
 
     class_store_double(dataptr, pvecback[pba->index_bg_D], _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_f], _TRUE_, storeidx);
@@ -2856,6 +2927,16 @@ int background_derivs(
 
   /** - calculate detivative of sound horizon \f$ drs/dloga = drs/dtau * dtau/dloga = c_s/aH \f$*/
   dy[pba->index_bi_rs] = 1. / a / H / sqrt(3. * (1. + 3. * pvecback[pba->index_bg_rho_b] / 4. / pvecback[pba->index_bg_rho_g])) * sqrt(1. - pba->K * y[pba->index_bi_rs] * y[pba->index_bi_rs]); // TBC: curvature correction
+
+  /** - calculate detivative of dark sound horizon \f$ drs/dloga = drs/dtau * dtau/dloga = c_s/aH \f$*/
+  if ((pba->has_idm_drmd == _TRUE_) && (pba->has_idr_drmd == _TRUE_))
+  {
+    double Rint, csp2, Gint;
+
+    class_call(background_idm_drmd(pba, a, pvecback[pba->index_bg_rho_idm_drmd] / pvecback[pba->index_bg_rho_idr_drmd], &Rint, &csp2, &Gint), pba->error_message, pba->error_message);
+
+    dy[pba->index_bi_rs_drmd] = 1. / a / H * sqrt(csp2) * sqrt(1. - pba->K * y[pba->index_bi_rs_drmd] * y[pba->index_bi_rs_drmd]); // TBC: curvature correction
+  }
 
   /** - solve second order growth equation \f$ [D''(\tau)=-aHD'(\tau)+3/2 a^2 \rho_M D(\tau) \f$
       written as \f$ dD/dloga = D' / (aH) \f$ and \f$ dD'/dloga = -D' + (3/2) (a/H) \rho_M D \f$ */

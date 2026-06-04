@@ -1,0 +1,192 @@
+#debug: true
+theory:
+  classy:
+    #path: 
+    extra_args:
+      start_large_k_at_tau_h_over_tau_k: 0.00002
+      G_over_aH_drmd_ini: 1.e7
+      N_ur: 2.0308
+      N_ncdm: 1
+      m_ncdm: 0.06
+      lensing: ’yes’
+      modes: s
+      output: lCl,tCl,pCl,mPk
+likelihood: 
+  planck_2018_lowl.TT: null
+  planck_2018_lowl.EE: null
+  planck_2018_highl_plik.TTTEEE: null
+  planck_2018_lensing.clik: null
+  sn.pantheonplus:  null
+  bao.desi_dr2: null
+
+  
+params:
+
+  log10z_stop:
+    prior: {min: 2, max: 5}     # uniform in log10 A
+    ref:   {dist: norm, loc: 4.64, scale: 0.05}   # optional start region
+    proposal: 0.1                 # MCMC step size in log10-space
+    drop: True                    # don't pass log10_A to theory
+    latex: \log_{10}(z_\mathrm{stop})
+
+  f_idm_drmd:
+    prior:
+      min: 0.0
+      max: 0.1
+    ref:
+      dist: norm
+      loc: 0.0239
+      scale: 0.001
+    proposal: 0.005
+    latex: f_\mathrm{idm}
+
+  z_stop:
+    value: "lambda log10z_stop: 10**log10z_stop"
+    derived: False                # this is a *model input* param
+    latex: z_\mathrm{stop}
+
+  delta_Neff_drmd:
+    prior:
+      min: 0.0
+      max: 3
+    ref:
+      dist: norm
+      loc: 0.443
+      scale: 0.01
+    proposal: 0.14
+    latex: \Delta N_\mathrm{eff}
+
+  alpha_s:
+    prior:
+      min: -0.1
+      max: +0.1
+    ref:
+      dist: norm
+      loc: 0.01
+      scale: 0.0005
+    proposal: 0.002
+    latex: \alpha_\mathrm{s}
+
+  beta_s:
+    prior:
+      min: -0.1
+      max: +0.1
+    ref:
+      dist: norm
+      loc: 0.01
+      scale: 0.0005
+    proposal: 0.002
+    latex: \beta_\mathrm{s}
+  logA:
+    prior:
+      min: 1.61
+      max: 3.91
+    ref:
+      dist: norm
+      loc: 3.04
+      scale: 0.001
+    proposal: 0.001
+    latex: \log(10^{10} A_\mathrm{s})
+    drop: true
+  A_s:
+    value: 'lambda logA: 1e-10*np.exp(logA)'
+    latex: A_\mathrm{s}
+  n_s:
+    prior:
+      min: 0.8
+      max: 1.2
+    ref:
+      dist: norm
+      loc: 0.9719
+      scale: 0.004
+    proposal: 0.002
+    latex: n_\mathrm{s}
+  H0:
+    prior:
+      min: 20
+      max: 100
+    ref:
+      dist: norm
+      loc: 70.4
+      scale: 0.1
+    proposal: 2
+    latex: H_0
+  omega_b:
+    prior:
+      min: 0.005
+      max: 0.1
+    ref:
+      dist: norm
+      loc: 0.02264
+      scale: 0.0001
+    proposal: 0.0001
+    latex: \Omega_\mathrm{b} h^2
+  omega_cdm:
+    prior:
+      min: 0.001
+      max: 0.99
+    ref:
+      dist: norm
+      loc: 0.1302
+      scale: 0.001
+    proposal: 0.0005
+    latex: \Omega_\mathrm{c} h^2
+  YHe:
+    latex: Y_\mathrm{P}
+  Omega_m:
+    latex: \Omega_\mathrm{m}
+  omegamh2:
+    derived: 'lambda Omega_m, H0: Omega_m*(H0/100)**2'
+    latex: \Omega_\mathrm{m} h^2
+  Omega_Lambda:
+    latex: \Omega_\Lambda
+  tau_reio:
+    prior:
+      min: 0.01
+      max: 0.8
+    ref:
+      dist: norm
+      loc: 0.052
+      scale: 0.006
+    proposal: 0.003
+    latex: \tau_\mathrm{reio}
+  z_reio:
+    latex: z_\mathrm{re}
+  sigma8:
+    latex: \sigma_8
+  s8h5:
+    derived: 'lambda sigma8, H0: sigma8*(H0*1e-2)**(-0.5)'
+    latex: \sigma_8/h^{0.5}
+  s8omegamp5:
+    derived: 'lambda sigma8, Omega_m: sigma8*Omega_m**0.5'
+    latex: \sigma_8 \Omega_\mathrm{m}^{0.5}
+  s8omegamp25:
+    derived: 'lambda sigma8, Omega_m: sigma8*Omega_m**0.25'
+    latex: \sigma_8 \Omega_\mathrm{m}^{0.25}
+  A:
+    derived: 'lambda A_s: 1e9*A_s'
+    latex: 10^9 A_\mathrm{s}
+  clamp:
+    derived: 'lambda A_s, tau_reio: 1e9*A_s*np.exp(-2*tau_reio)'
+    latex: 10^9 A_\mathrm{s} e^{-2\tau}
+  age:
+    latex: '{\rm{Age}}/\mathrm{Gyr}'
+  rs_drag:
+    latex: r_\mathrm{drag}
+  z_dec_drmd:
+    latex: z_\mathrm{dec}
+  rs_d_drmd:
+    latex: r_\mathrm{d,DAO}
+  h_r_d:
+    derived: 'lambda h, rs_drag: h*rs_drag'
+    latex: h r_\mathrm{d}
+
+sampler:
+  mcmc:
+    drag: true
+    oversample_power: 0.4
+    proposal_scale: 1.9
+    #covmat: path/to/covmat.txt
+    max_tries: .inf
+    Rminus1_stop: 0.01
+    Rminus1_cl_stop: 0.2
